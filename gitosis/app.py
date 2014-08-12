@@ -31,10 +31,14 @@ class App(object):
         parser = self.create_parser()
         (options, args) = parser.parse_args()
         cfg = self.create_config(options)
+
         try:
-            c = pymongo.MongoClient('localhost', 27017)
-            db = c["'gitosis_auth'"]
-            mongo.read_config_from_mongo(self, options, cfg, db, 'users', 'groups')
+            if options.mongoconfig:
+                c = pymongo.MongoClient(options.mongoconfig)
+                db = c.get_default_database()
+                mongo.read_config_from_mongo(self, options, cfg, db, 'users', 'groups')
+            else:
+                self.read_config(options, cfg)
         except CannotReadConfigError, e:
             log.error(str(e))
             sys.exit(1)
@@ -53,7 +57,10 @@ class App(object):
                           metavar='FILE',
                           help='read config from FILE',
                           )
-
+        parser.add_option('--mongoconfig',
+                          metavar='MONGOURL',
+                          help='read config from mongodb://[username:password@]host:port/database; ensure database has users and groups collection',
+                          )
         return parser
 
     def create_config(self, options):
