@@ -4,6 +4,8 @@ import logging
 import optparse
 import errno
 import ConfigParser
+import pymongo
+import mongo
 
 log = logging.getLogger('gitosis.app')
 
@@ -30,7 +32,9 @@ class App(object):
         (options, args) = parser.parse_args()
         cfg = self.create_config(options)
         try:
-            self.read_config(options, cfg)
+            c = pymongo.MongoClient('localhost', 27017)
+            db = c["'gitosis_auth'"]
+            mongo.read_config_from_mongo(self, options, cfg, db, 'users', 'groups')
         except CannotReadConfigError, e:
             log.error(str(e))
             sys.exit(1)
@@ -70,7 +74,7 @@ class App(object):
             cfg.readfp(conffile)
         finally:
             conffile.close()
-
+    
     def setup_logging(self, cfg):
         try:
             loglevel = cfg.get('gitosis', 'loglevel')
