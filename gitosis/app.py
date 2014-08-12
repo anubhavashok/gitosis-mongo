@@ -57,6 +57,7 @@ class App(object):
                           metavar='FILE',
                           help='read config from FILE',
                           )
+        
         parser.add_option('--mongoconfig',
                           metavar='MONGOURL',
                           help='read config from mongodb://[username:password@]host:port/database; ensure database has users and groups collection',
@@ -81,7 +82,7 @@ class App(object):
             cfg.readfp(conffile)
         finally:
             conffile.close()
-    
+
     def setup_logging(self, cfg):
         try:
             loglevel = cfg.get('gitosis', 'loglevel')
